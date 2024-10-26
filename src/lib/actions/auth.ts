@@ -2,6 +2,7 @@
 import { cookies } from "next/headers"
 import { COOKIE_KEYS } from "../constants"
 import { verifyJwt } from "../utils/verifyJWT"
+import { createClient } from "../supabase/server"
 
 export async function signInAction({ jwt }: { jwt: string }) {
   ;(await cookies()).set(COOKIE_KEYS.JWT, jwt, { secure: true })
@@ -19,7 +20,13 @@ export async function isAuthAction() {
 
     const payload = await verifyJwt(jwt)
 
-    return { isAuth: Boolean(payload.address) }
+    const supabase = await createClient()
+    const users = await supabase
+      .from("users_metadata")
+      .select("*")
+      .eq("address", payload.address as string)
+
+    return { isAuth: Boolean(users?.data?.[0]?.id) }
   } catch {
     return { isAuth: false }
   }

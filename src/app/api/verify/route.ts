@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import { SiweMessage } from "siwe"
 import { SignJWT } from "jose"
 import { env } from "@/lib/config/env"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   const session = await getIronSession<{ nonce: string }>(
@@ -20,24 +21,98 @@ export async function POST(request: Request) {
   if (fields.nonce !== session.nonce) {
     return NextResponse.json({ message: "Invalid nonce." }, { status: 422 })
   }
-  const jwt = await generateJwt({
-    address: fields.address,
-    chainId: fields.chainId,
-    domain: fields.domain,
-    nonce: fields.nonce,
-  })
+
+  const supabase = await createClient()
+  const users = await supabase
+    .from("users_metadata")
+    .select("*")
+    .eq("address", fields.address)
+
+  if (users?.error) {
+    return NextResponse.json(
+      { message: "Failed to create user: Error code 1001." },
+      { status: 422 }
+    )
+  }
+
+  if (!users?.data?.[0]?.id) {
+    const { data: user, error } = await supabase.auth.admin.createUser({
+      email: `${fields.address}@email.com`,
+      user_metadata: { address: fields.address },
+    })
+    if (error) {
+      return NextResponse.json(
+        { message: "Failed to create user: Error code 1002." },
+        { status: 422 }
+      )
+    }
+
+    const { error: userMetadataError } = await supabase
+      .from("users_metadata")
+      .insert([
+        {
+          address: fields.address,
+          id: user.user.id,
+          auth: {
+            genNonce: fields.nonce,
+            lastAuth: new Date().toISOString(),
+            lastAuthStatus: "success",
+          },
+        },
+      ])
+
+    if (userMetadataError) {
+      return NextResponse.json(
+        { message: "Failed to create user metadata: Error code 1003." },
+        { status: 422 }
+      )
+    }
+  }
+
+  const { error: updateAuthError } = await supabase
+    .from("users_metadata")
+    .update({
+      auth: {
+        genNonce: fields.nonce,
+        lastAuth: new Date().toISOString(),
+        lastAuthStatus: "success",
+      },
+    })
+    .eq("address", fields.address)
+
+  if (updateAuthError) {
+    return NextResponse.json(
+      { message: "Failed to update user auth: Error code 1004." },
+      { status: 422 }
+    )
+  }
+
+  const jwt = await generateJwt(
+    {
+      address: fields.address,
+      chainId: fields.chainId,
+      domain: fields.domain,
+      nonce: fields.nonce,
+    },
+    users?.data?.[0]?.id
+  )
 
   return NextResponse.json({ jwt })
 }
 
-async function generateJwt(payload: {
-  address: string
-  chainId: number
-  domain: string
-  nonce: string
-}) {
+async function generateJwt(
+  payload: {
+    address: string
+    chainId: number
+    domain: string
+    nonce: string
+  },
+  userId?: string | null
+) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
+    .setAudience("authenticated")
+    .setSubject(userId ?? "")
     .sign(new TextEncoder().encode(env.JWT_SECRET_KEY))
 }
