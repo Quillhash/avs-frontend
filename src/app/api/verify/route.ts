@@ -3,6 +3,8 @@ import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { SiweMessage } from "siwe"
+import { SignJWT } from "jose"
+import { env } from "@/lib/config/env"
 
 export async function POST(request: Request) {
   const session = await getIronSession<{ nonce: string }>(
@@ -18,6 +20,24 @@ export async function POST(request: Request) {
   if (fields.nonce !== session.nonce) {
     return NextResponse.json({ message: "Invalid nonce." }, { status: 422 })
   }
+  const jwt = await generateJwt({
+    address: fields.address,
+    chainId: fields.chainId,
+    domain: fields.domain,
+    nonce: fields.nonce,
+  })
 
-  return NextResponse.json({ jwt: "json_web_token" })
+  return NextResponse.json({ jwt })
+}
+
+async function generateJwt(payload: {
+  address: string
+  chainId: number
+  domain: string
+  nonce: string
+}) {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .sign(new TextEncoder().encode(env.JWT_SECRET_KEY))
 }
