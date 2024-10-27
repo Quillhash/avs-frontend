@@ -12,11 +12,11 @@ export default function Home() {
 
         <div className="text-center font-mono text-2xl font-bold">
           Get{" "}
-          <span className="from-primary to-secondary inline-block bg-gradient-to-r bg-clip-text text-transparent">
+          <span className="inline-block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Insured
           </span>{" "}
           Against Smart Contract{" "}
-          <span className="from-warning to-danger inline-block bg-gradient-to-br bg-clip-text text-transparent">
+          <span className="inline-block bg-gradient-to-br from-warning to-danger bg-clip-text text-transparent">
             Risks
           </span>
         </div>
@@ -31,7 +31,7 @@ export default function Home() {
           }) =>
             authenticationStatus === "authenticated" ? (
               <Button
-                className="from-secondary to-primary bg-gradient-to-br text-base font-semibold"
+                className="bg-gradient-to-br from-secondary to-primary text-base font-semibold"
                 size="lg"
                 variant="shadow"
                 color="primary"
@@ -42,7 +42,7 @@ export default function Home() {
               </Button>
             ) : (
               <Button
-                className="from-secondary to-primary bg-gradient-to-br text-base font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-gradient-to-br from-secondary to-primary text-base font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 size="lg"
                 variant="shadow"
                 color="primary"

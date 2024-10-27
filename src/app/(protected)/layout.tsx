@@ -1,3 +1,4 @@
+import { Navbar } from "@/components"
 import { isAuthAction } from "@/lib/actions/auth"
 import { redirect } from "next/navigation"
 
@@ -8,5 +9,11 @@ export default async function layout({
 }) {
   const { isAuth } = await isAuthAction()
   if (!isAuth) redirect("/")
-  return <>{children}</>
+
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  )
 }

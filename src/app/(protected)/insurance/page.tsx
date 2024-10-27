@@ -1,16 +1,16 @@
 "use client"
 import { Button, Input } from "@nextui-org/react"
 
-export default function Audit() {
+export default function Insurance() {
   return (
     <div className="grid max-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
       <main className="row-start-2 flex flex-col items-center justify-center gap-8">
         <div className="text-center font-mono text-2xl font-bold">
-          Get Started by{" "}
+          Get{" "}
           <span className="inline-block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Auditing
+            Insured
           </span>{" "}
-          Your Contracts
+          By Selecting Audited Contract
         </div>
 
         <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row">
@@ -20,7 +20,7 @@ export default function Audit() {
             color="primary"
             className="font-semibold max-md:w-full"
           >
-            Audit
+            Continue
           </Button>
         </div>
       </main>

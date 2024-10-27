@@ -8,7 +8,7 @@ export const verifyJwt = async (token: string) => {
       new TextEncoder().encode(env.JWT_SECRET_KEY)
     )
     return payload
-  } catch (error) {
+  } catch {
     throw new Error("Invalid token")
   }
 }
