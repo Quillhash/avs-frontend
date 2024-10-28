@@ -1,11 +1,4 @@
-import {
-  sepolia,
-  baseSepolia,
-  scrollSepolia,
-  optimismSepolia,
-  arbitrumSepolia,
-  polygonMumbai,
-} from "viem/chains"
+import { holesky } from "viem/chains"
 import { cookieStorage, createConfig, createStorage, http } from "wagmi"
 
 export default createConfig({
@@ -13,20 +6,6 @@ export default createConfig({
   storage: createStorage({
     storage: cookieStorage,
   }),
-  chains: [
-    sepolia,
-    baseSepolia,
-    scrollSepolia,
-    optimismSepolia,
-    arbitrumSepolia,
-    polygonMumbai,
-  ],
-  transports: {
-    [sepolia.id]: http(),
-    [baseSepolia.id]: http(),
-    [scrollSepolia.id]: http(),
-    [optimismSepolia.id]: http(),
-    [arbitrumSepolia.id]: http(),
-    [polygonMumbai.id]: http(),
-  },
+  chains: [holesky],
+  transports: { [holesky.id]: http() },
 })

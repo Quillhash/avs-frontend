@@ -56,7 +56,7 @@ export const Navbar = () => {
         <ConnectButton.Custom>
           {({ authenticationStatus, mounted, account, openAccountModal }) => (
             <Button
-              className="bg-gradient-to-br from-secondary to-primary text-base font-semibold"
+              className="bg-gradient-to-br from-secondary to-primary text-base font-semibold max-sm:min-w-10"
               size="md"
               variant="shadow"
               color="primary"

@@ -1,4 +1,13 @@
+"use client"
+import { AuditCard } from "@/components"
+
 export default function AuditedContracts() {
+  const chain = {
+    name: "Sepolia Testnet",
+    id: 1,
+    icon: "/icons/eth.svg",
+  }
+
   return (
     <div className="grid max-h-screen grid-rows-[32px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
       <div className="row-start-1 flex flex-col items-center justify-center gap-8">
@@ -8,6 +17,12 @@ export default function AuditedContracts() {
           </span>{" "}
           Smart Contracts
         </div>
+      </div>
+
+      <div className="row-start-2 grid max-w-4xl grid-cols-1 items-center justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <AuditCard key={index} index={index} chain={chain} />
+        ))}
       </div>
     </div>
   )
