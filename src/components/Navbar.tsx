@@ -31,14 +31,14 @@ export const Navbar = () => {
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="md:hidden"
+          className="lg:hidden"
         />
         <NavbarBrand>
-          <Logo />
+          <Logo isNavbar />
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="hidden gap-4 md:flex" justify="center">
+      <NavbarContent className="hidden gap-4 lg:flex" justify="center">
         {menuItems.map((item) => (
           <NavbarItem key={item.name} isActive={pathname === item.path}>
             <LinkNUI
@@ -53,6 +53,10 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent justify="end">
+        <Button className="flex bg-gradient-to-br from-success to-warning text-base font-semibold max-sm:hidden max-sm:min-w-10">
+          100 $QT
+        </Button>
+
         <ConnectButton.Custom>
           {({ authenticationStatus, mounted, account, openAccountModal }) => (
             <Button
@@ -84,6 +88,12 @@ export const Navbar = () => {
             </LinkNUI>
           </NavbarMenuItem>
         ))}
+
+        <NavbarMenuItem className="hidden max-sm:list-item">
+          <Button className="bg-gradient-to-br from-success to-warning text-base font-semibold">
+            100 $QT
+          </Button>
+        </NavbarMenuItem>
       </NavbarMenu>
     </NavbarNUI>
   )

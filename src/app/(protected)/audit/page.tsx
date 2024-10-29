@@ -51,7 +51,7 @@ export default function Audit() {
             </Button>
           </div>
 
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row flex-wrap gap-2">
             {availableChains.map((chain) => (
               <Chip
                 key={chain.id}

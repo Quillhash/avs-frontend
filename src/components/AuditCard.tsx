@@ -8,8 +8,11 @@ import {
   Chip,
 } from "@nextui-org/react"
 import Image from "next/image"
+import Link from "next/link"
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const AuditCard = ({ index, chain }: any) => {
+  const address = "0x1234567890123456789012345678901234567890"
   return (
     <Card
       key={index}
@@ -18,9 +21,7 @@ export const AuditCard = ({ index, chain }: any) => {
       className="group border-none p-2 transition-all"
     >
       <CardHeader className="grid items-center gap-2 py-2">
-        <p className="truncate font-mono font-semibold">
-          0x1234567890123456789012345678901234567890
-        </p>
+        <p className="truncate font-mono font-semibold">{address}</p>
         <Chip
           size="sm"
           color="secondary"
@@ -81,7 +82,14 @@ export const AuditCard = ({ index, chain }: any) => {
           className="absolute bottom-2 z-10 hidden w-[calc(100%_-_16px)] gap-2 overflow-hidden rounded-large border-1 border-white/20 p-2 shadow-2xl transition-all group-hover:flex"
           style={{ animation: "fadeInUp 0.25s" }}
         >
-          <Button variant="shadow" color="primary" size="sm" fullWidth>
+          <Button
+            variant="shadow"
+            color="primary"
+            size="sm"
+            fullWidth
+            as={Link}
+            href={`/audited-contracts/${address}`}
+          >
             View Report
           </Button>
 
