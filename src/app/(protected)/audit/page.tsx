@@ -1,31 +1,11 @@
 "use client"
 import { AuditCard } from "@/components"
-import { Button, Chip, Input } from "@nextui-org/react"
+import { availableChains } from "@/lib/constants"
+import { Button, Chip, cn, Input, Tooltip } from "@nextui-org/react"
 import Image from "next/image"
-import { useState } from "react"
-
-const availableChains = [
-  {
-    name: "Sepolia Testnet",
-    id: 1,
-    icon: "/icons/eth.svg",
-  },
-  {
-    name: "Holesky Testnet",
-    id: 2,
-    icon: "/icons/eth.svg",
-  },
-  {
-    name: "Base Goerli Testnet",
-    id: 3,
-    icon: "/icons/base.svg",
-  },
-]
 
 export default function Audit() {
-  const [selectedChain, setSelectedChain] = useState<
-    (typeof availableChains)[number]
-  >(availableChains[0])
+  const selectedChain = availableChains[0]
 
   return (
     <div className="grid max-h-screen grid-rows-[20px_1fr_1fr] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
@@ -53,23 +33,31 @@ export default function Audit() {
 
           <div className="flex flex-row flex-wrap gap-2">
             {availableChains.map((chain) => (
-              <Chip
+              <Tooltip
+                content={chain.id === 17000 ? "" : "Coming Soon"}
+                isDisabled={chain.id === 17000}
                 key={chain.id}
-                color={selectedChain?.id === chain.id ? "secondary" : "default"}
-                startContent={
-                  <Image
-                    src={chain.icon}
-                    alt={chain.name}
-                    width={20}
-                    height={20}
-                  />
-                }
-                className="cursor-pointer transition"
-                onClick={() => setSelectedChain(chain)}
-                variant={selectedChain?.id === chain.id ? "shadow" : "faded"}
               >
-                {chain.name}
-              </Chip>
+                <Chip
+                  color={
+                    selectedChain?.id === chain.id ? "secondary" : "default"
+                  }
+                  startContent={
+                    <Image
+                      src={chain.icon}
+                      alt={chain.name}
+                      width={20}
+                      height={20}
+                    />
+                  }
+                  className={cn("cursor-pointer transition", {
+                    "cursor-not-allowed opacity-70": chain.id !== 17000,
+                  })}
+                  variant={selectedChain?.id === chain.id ? "shadow" : "faded"}
+                >
+                  {chain.name}
+                </Chip>
+              </Tooltip>
             ))}
           </div>
         </div>

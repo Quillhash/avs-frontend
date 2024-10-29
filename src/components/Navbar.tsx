@@ -1,5 +1,4 @@
 "use client"
-import React from "react"
 import {
   Navbar as NavbarNUI,
   NavbarBrand,
@@ -10,11 +9,24 @@ import {
   NavbarMenuItem,
   Link as LinkNUI,
   Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  cn,
 } from "@nextui-org/react"
 import { Logo } from "./Logo"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import {
+  useAccount,
+  useBalance,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi"
+import { parseAbi } from "viem"
+import { useState } from "react"
 
 const menuItems = [
   { name: "Audit", path: "/audit" },
@@ -23,8 +35,55 @@ const menuItems = [
 ]
 
 export const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+
+  const { address } = useAccount()
+  const { data } = useBalance({
+    address,
+    token: "0x7607C082538c187F9050e23680D52B7EFC190011",
+    query: { enabled: !!address },
+  })
+
+  // const { data: hash, error, isPending, writeContract } = useWriteContract()
+
+  // async function submit() {
+  //   if (!address) return
+
+  //   writeContract({
+  //     address: "0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2",
+  //     abi: parseAbi(["function mint(address account, uint256 amount)"]),
+  //     functionName: "mint",
+  //     args: [address, BigInt(10)],
+  //   })
+  // }
+
+  // const { isLoading: isConfirming, isSuccess: isConfirmed } =
+  //   useWaitForTransactionReceipt({
+  //     hash,
+  //   })
+
+  // console.log("data", data, address)
+
+  const TokenBalanceComponent = ({ top }: { top?: boolean }) => {
+    return (
+      <Dropdown>
+        <DropdownTrigger>
+          <Button
+            className={cn(
+              "flex bg-gradient-to-br from-success to-warning text-base font-semibold",
+              { "max-sm:hidden max-sm:min-w-10": top }
+            )}
+          >
+            {data?.value} {data?.symbol}
+          </Button>
+        </DropdownTrigger>
+        <DropdownMenu aria-label="Actions" variant="flat">
+          <DropdownItem key="Mint QuillTokens">Mint QuillTokens</DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+    )
+  }
 
   return (
     <NavbarNUI onMenuOpenChange={setIsMenuOpen}>
@@ -53,9 +112,7 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent justify="end">
-        <Button className="flex bg-gradient-to-br from-success to-warning text-base font-semibold max-sm:hidden max-sm:min-w-10">
-          100 $QT
-        </Button>
+        <TokenBalanceComponent top />
 
         <ConnectButton.Custom>
           {({ authenticationStatus, mounted, account, openAccountModal }) => (
@@ -90,9 +147,7 @@ export const Navbar = () => {
         ))}
 
         <NavbarMenuItem className="hidden max-sm:list-item">
-          <Button className="bg-gradient-to-br from-success to-warning text-base font-semibold">
-            100 $QT
-          </Button>
+          <TokenBalanceComponent />
         </NavbarMenuItem>
       </NavbarMenu>
     </NavbarNUI>
