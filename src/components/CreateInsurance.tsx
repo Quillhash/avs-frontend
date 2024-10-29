@@ -1,4 +1,5 @@
 "use client"
+import { calculatePremiumPayable } from "@/lib/utils/calculatePremiumPayable"
 import {
   Modal,
   ModalContent,
@@ -8,78 +9,102 @@ import {
   Button,
   Input,
 } from "@nextui-org/react"
+import { useState } from "react"
 import { useAccount } from "wagmi"
 
 type P = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   address: string
-  // riskScore: number
+  securityPercentage: number
 }
 
 export const CreateInsurance = ({
   isOpen,
   onOpenChange,
   address,
-  // riskScore,
+  securityPercentage,
 }: P) => {
   const { address: userAddress } = useAccount()
+  const [coverageAmount, setCoverageAmount] = useState<number>()
+  const [duration, setDuration] = useState<number>()
 
-  const coverageAmount = 1000
-  const riskScore = 20
-  const duration = 12
-
-  // 𝐶×(_riskScore×1𝑒16)×(_duration×1𝑒18/31536000)/1𝑒36
-  const premiumPayable =
-    (coverageAmount * (riskScore * 1e16) * ((duration * 1e18) / 31536000)) /
-    1e36
-
-  console.log("premiumPayable", {
-    premiumPayable,
+  const premiumPayable = calculatePremiumPayable(
     coverageAmount,
-    riskScore,
     duration,
-  })
+    securityPercentage
+  )
+
+  const handleClose = () => {
+    setCoverageAmount(undefined)
+    setDuration(undefined)
+    onOpenChange(false)
+  }
+
+  const onSubmit = () => {
+    if (!coverageAmount || !duration || !premiumPayable) return
+
+    handleClose()
+
+    console.log("premiumPayable", {
+      premiumPayable,
+      coverageAmount,
+      securityPercentage,
+      duration,
+    })
+  }
 
   return (
     <Modal
       isOpen={isOpen}
-      size="lg"
+      size="xl"
       backdrop="blur"
-      onOpenChange={onOpenChange}
+      onOpenChange={handleClose}
       placement="center"
     >
       <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="inline-flex flex-col gap-1">
-              Create Insurance for <span className="truncate">{address}</span>
-            </ModalHeader>
+        <ModalHeader className="inline-flex flex-col gap-1">
+          Create Insurance for <span className="truncate">{address}</span>
+        </ModalHeader>
 
-            <ModalBody>
-              <div className="flex gap-2">
-                <Input
-                  autoFocus
-                  label="Coverage Amount (QT)"
-                  variant="bordered"
-                />
-                <Input label="Coverage Duration (months)" variant="bordered" />
-              </div>
-              <Input label="Premium Payable (QT)" variant="bordered" disabled />
-            </ModalBody>
+        <ModalBody>
+          <div className="flex gap-2">
+            <Input
+              autoFocus
+              label="Coverage Amount (in QT)"
+              variant="bordered"
+              type="number"
+              value={coverageAmount?.toString()}
+              onChange={(e) => setCoverageAmount(Number(e.target.value || 0))}
+            />
+            <Input
+              label="Coverage Duration (in Months)"
+              variant="bordered"
+              type="number"
+              value={duration?.toString()}
+              onChange={(e) => setDuration(Number(e.target.value || 0))}
+            />
+          </div>
+          <Input
+            label="Premium Payable (in QT)"
+            variant="flat"
+            disabled
+            type="number"
+            value={premiumPayable?.toString()}
+          />
+        </ModalBody>
 
-            <ModalFooter className="justify-center">
-              <Button
-                color="primary"
-                onPress={onClose}
-                className="font-semibold"
-                fullWidth
-              >
-                Pay Premium
-              </Button>
-            </ModalFooter>
-          </>
-        )}
+        <ModalFooter className="justify-center">
+          <Button
+            color="primary"
+            onPress={onSubmit}
+            className="font-semibold disabled:cursor-not-allowed disabled:opacity-70"
+            fullWidth
+            disabled={!coverageAmount || !duration || !premiumPayable}
+          >
+            Pay Premium
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   )

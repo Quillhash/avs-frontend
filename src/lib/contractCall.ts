@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QUILLTOKEN_ADDRESS, INSURANCE_CONTRACT_ADDRESS } from "@/lib/constants"
 import {
   useAccount,

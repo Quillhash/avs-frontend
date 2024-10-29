@@ -36,8 +36,9 @@ const menuItems = [
   { name: "Insurance", path: "/insurance" },
 ]
 
-const formatBalance = (value?: bigint) => {
-  return formatEther(value || BigInt(0))
+const formatBalance = (value?: bigint, decimals?: boolean) => {
+  const formattedValue = formatEther(value || BigInt(0)) || "0"
+  return decimals ? formattedValue : formattedValue?.split(".")[0]
 }
 
 export const Navbar = () => {
@@ -91,9 +92,7 @@ export const Navbar = () => {
               ""
             ) : (
               <>
-                <span className="max-w-14 truncate font-mono">
-                  {formatBalance(data?.value)}
-                </span>{" "}
+                <span className="font-mono">{formatBalance(data?.value)}</span>{" "}
                 {data?.symbol}
               </>
             )}
@@ -102,7 +101,7 @@ export const Navbar = () => {
         <DropdownMenu aria-label="Actions" variant="flat">
           <DropdownItem startContent={<IconCoinBitcoin />} key="Balance">
             <div className="font-mono text-base font-semibold">
-              {formatBalance(data?.value)}
+              {formatBalance(data?.value, true)}
             </div>
             <div className="text-sm">QuillTokens</div>
           </DropdownItem>
