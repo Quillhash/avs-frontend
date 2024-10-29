@@ -25,8 +25,10 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi"
-import { parseAbi } from "viem"
-import { useState } from "react"
+import { formatEther, parseAbi, parseEther } from "viem"
+import { useEffect, useState } from "react"
+import { QUILLTOKEN_ADDRESS } from "@/lib/constants"
+import { IconCoinBitcoin, IconPlus } from "@tabler/icons-react"
 
 const menuItems = [
   { name: "Audit", path: "/audit" },
@@ -34,52 +36,84 @@ const menuItems = [
   { name: "Insurance", path: "/insurance" },
 ]
 
+const formatBalance = (value?: bigint) => {
+  return formatEther(value || BigInt(0))
+}
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
 
   const { address } = useAccount()
-  const { data } = useBalance({
+  const { data, isLoading, refetch } = useBalance({
     address,
     token: "0x7607C082538c187F9050e23680D52B7EFC190011",
     query: { enabled: !!address },
   })
 
-  // const { data: hash, error, isPending, writeContract } = useWriteContract()
+  const { data: hash, writeContract, isPending } = useWriteContract()
 
-  // async function submit() {
-  //   if (!address) return
+  async function submit() {
+    if (!address) return
 
-  //   writeContract({
-  //     address: "0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2",
-  //     abi: parseAbi(["function mint(address account, uint256 amount)"]),
-  //     functionName: "mint",
-  //     args: [address, BigInt(10)],
-  //   })
-  // }
+    writeContract({
+      address: QUILLTOKEN_ADDRESS,
+      abi: parseAbi(["function mint(address account, uint256 amount)"]),
+      functionName: "mint",
+      args: [address, parseEther("10")],
+    })
+  }
 
-  // const { isLoading: isConfirming, isSuccess: isConfirmed } =
-  //   useWaitForTransactionReceipt({
-  //     hash,
-  //   })
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    })
 
-  // console.log("data", data, address)
+  useEffect(() => {
+    refetch()
+  }, [isConfirmed])
+
+  const loading = isLoading || isConfirming || isPending
 
   const TokenBalanceComponent = ({ top }: { top?: boolean }) => {
     return (
       <Dropdown>
         <DropdownTrigger>
           <Button
+            startContent={<IconCoinBitcoin />}
             className={cn(
               "flex bg-gradient-to-br from-success to-warning text-base font-semibold",
               { "max-sm:hidden max-sm:min-w-10": top }
             )}
+            isLoading={loading}
           >
-            {data?.value} {data?.symbol}
+            {loading ? (
+              ""
+            ) : (
+              <>
+                <span className="max-w-14 truncate font-mono">
+                  {formatBalance(data?.value)}
+                </span>{" "}
+                {data?.symbol}
+              </>
+            )}
           </Button>
         </DropdownTrigger>
         <DropdownMenu aria-label="Actions" variant="flat">
-          <DropdownItem key="Mint QuillTokens">Mint QuillTokens</DropdownItem>
+          <DropdownItem startContent={<IconCoinBitcoin />} key="Balance">
+            <div className="font-mono text-base font-semibold">
+              {formatBalance(data?.value)}
+            </div>
+            <div className="text-sm">QuillTokens</div>
+          </DropdownItem>
+
+          <DropdownItem
+            key="Mint QuillTokens"
+            onClick={submit}
+            startContent={<IconPlus />}
+          >
+            Mint QuillTokens
+          </DropdownItem>
         </DropdownMenu>
       </Dropdown>
     )

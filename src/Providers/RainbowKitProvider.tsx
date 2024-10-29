@@ -2,6 +2,7 @@
 import "@rainbow-me/rainbowkit/styles.css"
 import { State, WagmiProvider } from "wagmi"
 import {
+  darkTheme,
   RainbowKitProvider as NextRainbowKitProvider,
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit"
@@ -55,7 +56,15 @@ export const RainbowKitProvider = ({
           adapter={authenticationAdapter}
           status={status}
         >
-          <NextRainbowKitProvider coolMode>{children}</NextRainbowKitProvider>
+          <NextRainbowKitProvider
+            coolMode
+            theme={darkTheme()}
+            appInfo={{
+              appName: "QuillShield AVS",
+            }}
+          >
+            {children}
+          </NextRainbowKitProvider>
         </RainbowKitAuthenticationProvider>
       </ReactQueryProvider>
     </WagmiProvider>

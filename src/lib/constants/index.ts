@@ -7,6 +7,8 @@ export const EMITTER_EVENTS = {
   SIGN_OUT: "sign_out",
 }
 
+export const QUILLTOKEN_ADDRESS = "0x7607C082538c187F9050e23680D52B7EFC190011"
+
 export const availableChains = [
   {
     name: "Holesky Testnet",
