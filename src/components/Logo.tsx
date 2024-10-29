@@ -1,5 +1,6 @@
 import { cn } from "@nextui-org/react"
 import Image from "next/image"
+import Link from "next/link"
 
 type LogoProps = {
   isNavbar?: boolean
@@ -7,7 +8,7 @@ type LogoProps = {
 
 export const Logo = ({ isNavbar }: LogoProps) => {
   return (
-    <div className="flex items-center gap-3 max-sm:gap-2">
+    <Link className="flex items-center gap-3 max-sm:gap-2" href="/">
       <Image
         src="/logos/og-logo.svg"
         alt="logo"
@@ -29,6 +30,6 @@ export const Logo = ({ isNavbar }: LogoProps) => {
       >
         AVS
       </span>
-    </div>
+    </Link>
   )
 }

@@ -14,7 +14,7 @@ export default function AuditedContracts() {
         </div>
       </div>
 
-      <div className="row-start-2 grid max-w-4xl grid-cols-1 items-center justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div className="row-start-2 grid max-w-4xl grid-cols-1 items-stretch justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 8 }).map((_, index) => (
           <AuditCard key={index} index={index} chain={availableChains[0]} />
         ))}

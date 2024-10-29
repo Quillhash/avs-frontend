@@ -8,8 +8,8 @@ export default function Audit() {
   const selectedChain = availableChains[0]
 
   return (
-    <div className="grid max-h-screen grid-rows-[20px_1fr_1fr] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
-      <main className="row-start-2 flex flex-col items-center justify-center gap-8">
+    <div className="grid max-h-screen grid-rows-[1fr_1fr] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
+      <main className="flex flex-col items-center justify-center gap-8">
         <div className="text-center font-mono text-2xl font-bold">
           Get Started by{" "}
           <span className="inline-block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -63,7 +63,7 @@ export default function Audit() {
         </div>
       </main>
 
-      <div className="row-start-3">
+      <div className="">
         <div className="mb-8 flex flex-col items-center justify-center gap-8">
           <div className="text-center font-mono text-2xl font-bold">
             Recently{" "}
@@ -74,7 +74,7 @@ export default function Audit() {
           </div>
         </div>
 
-        <div className="grid max-w-4xl grid-cols-1 items-center justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid max-w-4xl grid-cols-1 items-stretch justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <AuditCard key={index} index={index} chain={availableChains[0]} />
           ))}

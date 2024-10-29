@@ -1,29 +1,29 @@
 "use client"
-import { Button, Input } from "@nextui-org/react"
+import { InsuranceCard } from "@/components"
+import { availableChains } from "@/lib/constants"
 
 export default function Insurance() {
   return (
-    <div className="grid max-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
-      <main className="row-start-2 flex flex-col items-center justify-center gap-8">
+    <div className="grid max-h-screen grid-rows-[32px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
+      <div className="row-start-1 flex flex-col items-center justify-center gap-8">
         <div className="text-center font-mono text-2xl font-bold">
-          Get{" "}
+          Claim{" "}
           <span className="inline-block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Insured
+            Insurance
           </span>{" "}
-          By Selecting Audited Contract
+          For Your{" "}
+          <span className="inline-block bg-gradient-to-r from-warning to-danger bg-clip-text text-transparent">
+            Hacked
+          </span>{" "}
+          Smart Contract
         </div>
+      </div>
 
-        <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row">
-          <Input type="text" label="Smart Contract Address" />
-          <Button
-            size="lg"
-            color="primary"
-            className="font-semibold max-md:w-full"
-          >
-            Continue
-          </Button>
-        </div>
-      </main>
+      <div className="row-start-2 grid max-w-4xl grid-cols-1 items-stretch justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <InsuranceCard key={index} index={index} chain={availableChains[0]} />
+        ))}
+      </div>
     </div>
   )
 }
