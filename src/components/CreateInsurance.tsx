@@ -96,13 +96,12 @@ export const CreateInsurance = ({
 
         <ModalFooter className="justify-center">
           <Button
-            color="primary"
             onPress={onSubmit}
-            className="font-semibold disabled:cursor-not-allowed disabled:opacity-70"
+            className="bg-gradient-to-br from-secondary to-primary font-semibold disabled:cursor-not-allowed disabled:opacity-70"
             fullWidth
             disabled={!coverageAmount || !duration || !premiumPayable}
           >
-            Pay Premium
+            Pay Premium and Start Insurance
           </Button>
         </ModalFooter>
       </ModalContent>

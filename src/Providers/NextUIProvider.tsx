@@ -6,7 +6,7 @@ import { Toaster } from "sonner"
 export const NextUIProvider = ({ children }: { children: ReactNode }) => {
   return (
     <NUIProvider>
-      <Toaster richColors invert />
+      <Toaster richColors invert position="top-right" />
       {children}
     </NUIProvider>
   )

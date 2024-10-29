@@ -11,11 +11,11 @@ const calculateRiskScore = (securityPercentage?: number) => {
 export const calculatePremiumPayable = (
   coverageAmount?: number,
   durationInMonth?: number,
-  securityScore?: number
+  securityPercentage?: number
 ) => {
   if (!coverageAmount || !durationInMonth) return undefined
 
-  const riskScore = calculateRiskScore(securityScore)
+  const riskScore = calculateRiskScore(securityPercentage)
   const durationInMS = calculateDurationInMS(durationInMonth)
 
   return Number.parseFloat(

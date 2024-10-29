@@ -25,7 +25,7 @@ export const AuditCard = ({ index, chain }: any) => {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         address={address}
-        // riskScore={10}
+        securityPercentage={98.32}
       />
 
       <Card
