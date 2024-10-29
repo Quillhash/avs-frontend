@@ -1,7 +1,5 @@
 import { createAuthenticationAdapter } from "@rainbow-me/rainbowkit"
 import { signInAction, signOutAction } from "../actions/auth"
-import { eventEmitter } from "../config/eventEmitter"
-import { EMITTER_EVENTS } from "../constants"
 import { createSiweMessage } from "viem/siwe"
 
 export const authenticationAdapter = createAuthenticationAdapter({
@@ -36,13 +34,10 @@ export const authenticationAdapter = createAuthenticationAdapter({
 
     await signInAction({ jwt: data.jwt })
 
-    eventEmitter.emit(EMITTER_EVENTS.SIGN_IN)
-
     return true
   },
   signOut: async () => {
     await fetch("/api/logout")
     await signOutAction()
-    eventEmitter.emit(EMITTER_EVENTS.SIGN_OUT)
   },
 })

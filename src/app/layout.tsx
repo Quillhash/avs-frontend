@@ -6,7 +6,7 @@ import { GeistMono } from "geist/font/mono"
 
 export const metadata: Metadata = {
   title: "QuillShield AVS",
-  description: "QuillShield AVS",
+  description: "QuillShield AVS - Insurance for Smart Contracts",
 }
 
 export default function RootLayout({

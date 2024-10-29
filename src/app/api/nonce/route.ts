@@ -2,7 +2,7 @@ import { IRON_OPTIONS } from "@/lib/config/session"
 import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-import { generateNonce } from "siwe"
+import { generateSiweNonce } from "viem/siwe"
 
 export async function GET() {
   const session = await getIronSession<{ nonce: string }>(
@@ -10,7 +10,7 @@ export async function GET() {
     IRON_OPTIONS
   )
 
-  session.nonce = generateNonce()
+  session.nonce = generateSiweNonce()
   await session.save()
 
   return NextResponse.json({ nonce: session.nonce }, { status: 200 })

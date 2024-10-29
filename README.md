@@ -1,5 +1,10 @@
 # QuillShield AVS
 
+Pre-requisites:
+
+- Node.js v18.x
+- Yarn v1.x
+
 Setup:
 
 ```bash

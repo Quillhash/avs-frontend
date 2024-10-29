@@ -1,7 +1,7 @@
 "use client"
 import { AuditCard } from "@/components"
 import {
-  availableChains,
+  CHAINS,
   INSURANCE_CONTRACT_ADDRESS,
   QUILLTOKEN_ADDRESS,
 } from "@/lib/constants"
@@ -13,7 +13,7 @@ import { isAddress, parseAbi } from "viem"
 import { useAccount, useBalance, useWriteContract } from "wagmi"
 
 export default function Audit() {
-  const selectedChain = availableChains[0]
+  const selectedChain = CHAINS[0]
   const [contractAddress, setContractAddress] = useState<string>()
 
   const { address } = useAccount()
@@ -102,7 +102,7 @@ export default function Audit() {
           </div>
 
           <div className="flex flex-row flex-wrap gap-2">
-            {availableChains.map((chain) => (
+            {CHAINS.map((chain) => (
               <Tooltip
                 content={chain.id === 17000 ? "" : "Coming Soon"}
                 isDisabled={chain.id === 17000}
@@ -146,7 +146,7 @@ export default function Audit() {
 
         <div className="grid max-w-4xl grid-cols-1 items-stretch justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <AuditCard key={index} index={index} chain={availableChains[0]} />
+            <AuditCard key={index} index={index} chain={CHAINS[0]} />
           ))}
         </div>
       </div>
