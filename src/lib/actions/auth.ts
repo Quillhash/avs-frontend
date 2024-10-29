@@ -22,7 +22,7 @@ export async function isAuthAction() {
 
     const supabase = await createClient()
     const users = await supabase
-      .from("users_metadata")
+      .from("users")
       .select("*")
       .eq("address", payload.address as string)
 

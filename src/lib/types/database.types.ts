@@ -9,26 +9,108 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      users_metadata: {
+      audits: {
+        Row: {
+          address: string | null
+          chain_id: number | null
+          created_at: string
+          id: number
+          ipfs: string | null
+          score: number | null
+          state: number | null
+          task_index: number | null
+          user_id: number | null
+        }
+        Insert: {
+          address?: string | null
+          chain_id?: number | null
+          created_at?: string
+          id?: number
+          ipfs?: string | null
+          score?: number | null
+          state?: number | null
+          task_index?: number | null
+          user_id?: number | null
+        }
+        Update: {
+          address?: string | null
+          chain_id?: number | null
+          created_at?: string
+          id?: number
+          ipfs?: string | null
+          score?: number | null
+          state?: number | null
+          task_index?: number | null
+          user_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurances: {
+        Row: {
+          audit_id: number | null
+          coverage_amount: number | null
+          created_at: string
+          duration: number | null
+          id: number
+          status: number | null
+          task_index: number | null
+        }
+        Insert: {
+          audit_id?: number | null
+          coverage_amount?: number | null
+          created_at?: string
+          duration?: number | null
+          id?: number
+          status?: number | null
+          task_index?: number | null
+        }
+        Update: {
+          audit_id?: number | null
+          coverage_amount?: number | null
+          created_at?: string
+          duration?: number | null
+          id?: number
+          status?: number | null
+          task_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurances_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
         Row: {
           address: string
           auth: Json | null
           created_at: string
-          id: string | null
+          id: number
           updated_at: string
         }
         Insert: {
           address: string
           auth?: Json | null
           created_at?: string
-          id?: string | null
+          id?: number
           updated_at?: string
         }
         Update: {
           address?: string
           auth?: Json | null
           created_at?: string
-          id?: string | null
+          id?: number
           updated_at?: string
         }
         Relationships: []

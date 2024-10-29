@@ -24,42 +24,29 @@ export async function POST(request: Request) {
 
   const supabase = await createClient()
   const users = await supabase
-    .from("users_metadata")
+    .from("users")
     .select("*")
     .eq("address", fields.address)
 
   if (users?.error) {
+    console.error("error", users.error)
     return NextResponse.json(
       { message: "Failed to create user: Error code 1001." },
       { status: 422 }
     )
   }
 
-  if (!users?.data?.[0]?.id) {
-    const { data: user, error } = await supabase.auth.admin.createUser({
-      email: `${fields.address}@email.com`,
-      user_metadata: { address: fields.address },
-    })
-    if (error) {
-      return NextResponse.json(
-        { message: "Failed to create user: Error code 1002." },
-        { status: 422 }
-      )
-    }
-
-    const { error: userMetadataError } = await supabase
-      .from("users_metadata")
-      .insert([
-        {
-          address: fields.address,
-          id: user.user.id,
-          auth: {
-            genNonce: fields.nonce,
-            lastAuth: new Date().toISOString(),
-            lastAuthStatus: "success",
-          },
+  if (!users?.data?.[0]?.address) {
+    const { error: userMetadataError } = await supabase.from("users").insert([
+      {
+        address: fields.address,
+        auth: {
+          genNonce: fields.nonce,
+          lastAuth: new Date().toISOString(),
+          lastAuthStatus: "success",
         },
-      ])
+      },
+    ])
 
     if (userMetadataError) {
       return NextResponse.json(
@@ -70,7 +57,7 @@ export async function POST(request: Request) {
   }
 
   const { error: updateAuthError } = await supabase
-    .from("users_metadata")
+    .from("users")
     .update({
       auth: {
         genNonce: fields.nonce,
@@ -94,7 +81,7 @@ export async function POST(request: Request) {
       domain: fields.domain,
       nonce: fields.nonce,
     },
-    users?.data?.[0]?.id
+    String(users?.data?.[0]?.id)
   )
 
   return NextResponse.json({ jwt })
