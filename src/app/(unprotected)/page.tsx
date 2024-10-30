@@ -31,6 +31,10 @@ export default function Home() {
           Against Smart Contract{" "}
           <span className="inline-block bg-gradient-to-br from-warning to-danger bg-clip-text text-transparent">
             Risks
+          </span>{" "}
+          with{" "}
+          <span className="inline-block bg-gradient-to-br from-secondary to-pink-700 bg-clip-text text-transparent">
+            Eigen AVS
           </span>
         </div>
 
@@ -61,8 +65,8 @@ export default function Home() {
                 color="primary"
                 startContent={
                   <Image
-                    src="/vercel.svg"
-                    alt="Vercel logomark"
+                    src="/icons/triangle.svg"
+                    alt="triangle"
                     width={20}
                     height={20}
                   />

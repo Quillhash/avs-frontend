@@ -13,7 +13,7 @@ import Link from "next/link"
 import { CreateInsurance } from "./CreateInsurance"
 import { CHAINS } from "@/lib/constants"
 import { Audit } from "@/lib/types/common"
-import { IconHourglass } from "@tabler/icons-react"
+import { IconCircleXFilled, IconHourglass } from "@tabler/icons-react"
 
 type AuditCardProps = {
   chain: (typeof CHAINS)[0]
@@ -64,17 +64,16 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
             </div>
           )}
 
-          {/** Audit Failed State */}
-          {/* {index === 1 && (
+          {!!audit?.submission?.audited && !audit?.report?.ipfsInfo && (
             <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
               <IconCircleXFilled size={64} className="text-danger" />
               <div className="text-xl font-semibold text-danger">
                 Audit Failed
               </div>
             </div>
-          )} */}
+          )}
 
-          {!!audit?.submission?.audited && (
+          {!!audit?.submission?.audited && !!audit?.report?.ipfsInfo && (
             <>
               <div className="flex flex-col items-center justify-center gap-2 p-1">
                 <h3 className="text-center text-sm font-medium">
@@ -131,7 +130,7 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
           )}
         </CardBody>
 
-        {!!audit?.submission?.audited && (
+        {!!audit?.submission?.audited && !!audit?.report?.ipfsInfo && (
           <CardFooter
             className="absolute bottom-2 z-10 hidden w-[calc(100%_-_16px)] gap-2 overflow-hidden rounded-large border-1 border-white/20 p-2 shadow-2xl transition-all group-hover:flex"
             style={{ animation: "fadeInUp 0.25s" }}

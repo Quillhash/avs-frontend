@@ -33,7 +33,11 @@ export default function Audit() {
   const handleAuditSubmit = async () => {
     if (!contractAddress || !isAddress(contractAddress))
       return toast.error("Please enter a valid contract address.")
-    if (!balance?.value) return toast.error("Insufficient QuillToken balance.")
+    if (!balance?.value)
+      return toast.error("Insufficient QuillToken balance.", {
+        description:
+          "You can mint QuillTokens by clicking the Mint QuillTokens button on the Navbar.",
+      })
 
     const hash = await writeContractAsync(
       {
@@ -94,17 +98,21 @@ export default function Audit() {
         </div>
 
         <div className="flex w-full flex-col gap-4">
-          <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row">
+          <div className="flex w-full max-w-xl flex-col gap-2 md:flex-row">
             <Input
               type="text"
               label="Smart Contract Address"
               value={contractAddress}
               onChange={(e) => setContractAddress(e.target.value)}
+              description="Note: Make sure that the pragma selection of the provided contract is not more than 0.8.23"
+              classNames={{
+                description: "text-sm",
+              }}
             />
             <Button
               size="lg"
               color="primary"
-              className="font-semibold disabled:cursor-not-allowed disabled:opacity-70 max-md:w-full"
+              className="h-14 font-semibold disabled:cursor-not-allowed disabled:opacity-70 max-md:w-full"
               variant="shadow"
               disabled={!contractAddress}
               onClick={handleAuditSubmit}

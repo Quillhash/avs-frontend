@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
           //@ts-expect-error
           ipfsInfo: report[0]
             ? //@ts-expect-error
-              JSON.parse(Object.keys(await fetchIpfsData(report[0]))[0])
+              parseIpfsData(await fetchIpfsData(report[0]))
             : null,
           //@ts-expect-error
           score: report[1],
@@ -128,5 +128,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ totalAudits, audits: serializedSubmissions })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 400 })
+  }
+}
+
+const parseIpfsData = (data: Record<string, string>) => {
+  try {
+    return JSON.parse(Object.keys(data)[0])
+  } catch {
+    return null
   }
 }
