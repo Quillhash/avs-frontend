@@ -1,5 +1,5 @@
 "use client"
-import { CHAINS } from "@/lib/constants"
+import { CHAINS, SERVICE_MANAGER_CONTRACT_ADDRESS } from "@/lib/constants"
 import { Audit } from "@/lib/types/common"
 import {
   Button,
@@ -8,11 +8,12 @@ import {
   CardFooter,
   CardHeader,
   Chip,
-  Spinner,
 } from "@nextui-org/react"
-import { IconCircleCheckFilled } from "@tabler/icons-react"
+import { IconCircleCheckFilled, IconHourglass } from "@tabler/icons-react"
 import Image from "next/image"
 import { toast } from "sonner"
+import { parseAbi } from "viem"
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi"
 
 type AuditCardProps = {
   chain: (typeof CHAINS)[0]
@@ -22,7 +23,39 @@ type AuditCardProps = {
 export const InsuranceCard = ({ chain, audit }: AuditCardProps) => {
   const durationInMS =
     (audit?.policies?.endTime || 0) - (audit?.policies?.startTime || 0)
-  const durationInMonths = Math.abs(durationInMS) / 30 / 24 / 60 / 60 / 1000
+  const durationInMonths = Math.abs(durationInMS) / 30 / 24 / 60 / 60
+
+  const { isPending, writeContractAsync, data: hash } = useWriteContract()
+
+  const { isLoading } = useWaitForTransactionReceipt({
+    hash,
+    query: { enabled: !!hash },
+  })
+
+  const handleClaimSubmit = async () => {
+    if (!audit?.policies?.policyId || !audit?.report?.ipfsHash)
+      return toast.error("Please enter a valid values.")
+
+    await writeContractAsync(
+      {
+        address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+        abi: parseAbi([
+          "function fileClaim(uint256 _policyId,string memory _evidenceIPFSHash)",
+        ]),
+        functionName: "fileClaim",
+        args: [BigInt(audit?.policies?.policyId), audit?.report?.ipfsHash],
+      },
+      {
+        onError: (error) => {
+          console.error(error)
+          toast.error("Failed to claim insurance")
+        },
+        onSuccess: () => {
+          toast.success("Claim submitted successfully.")
+        },
+      }
+    )
+  }
 
   return (
     <Card
@@ -49,8 +82,8 @@ export const InsuranceCard = ({ chain, audit }: AuditCardProps) => {
       <CardBody className="mt-4 flex flex-row flex-wrap items-center justify-center gap-2 rounded-xl bg-primary-foreground/5">
         {audit?.policies?.status === 2 && (
           <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
-            <Spinner size="lg" className="h-16 w-16" color="warning" />
-            <div className="text-xl font-semibold text-warning">
+            <IconHourglass size={48} className="text-warning" />
+            <div className="font-mono text-lg font-semibold text-warning">
               Awaiting Verification
             </div>
             <div className="text-sm">
@@ -73,8 +106,8 @@ export const InsuranceCard = ({ chain, audit }: AuditCardProps) => {
 
         {audit?.policies?.status === 3 && (
           <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
-            <IconCircleCheckFilled size={64} className="text-success" />
-            <div className="text-xl font-semibold text-success">
+            <IconCircleCheckFilled size={48} className="text-success" />
+            <div className="font-mono text-lg font-semibold text-success">
               Claim Processed
             </div>
             <div className="text-sm">
@@ -100,19 +133,21 @@ export const InsuranceCard = ({ chain, audit }: AuditCardProps) => {
               </h3>
               <div className="flex flex-row flex-wrap items-center justify-center gap-2">
                 <h4 className="text-lg font-bold text-[#EEE]">
-                  {audit?.policies?.coverageAmount} QT
+                  {(audit?.policies?.coverageAmount || 0) / 1e18} QT
                 </h4>
               </div>
             </div>
 
             <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
-              <h3 className="text-center text-sm font-medium">Risk Score</h3>
+              <h3 className="text-center text-sm font-medium">
+                Security Score
+              </h3>
               <div className="flex flex-row flex-wrap items-center justify-center gap-2">
                 <Image
                   src={"/icons/security-score.svg"}
                   width={22}
                   height={22}
-                  alt={"Risk Score"}
+                  alt={"Security Score"}
                 />
                 <h4 className="text-lg font-bold text-[#EEE]">
                   {audit?.report?.ipfsInfo?.auditReport?.securityScore}%
@@ -130,14 +165,15 @@ export const InsuranceCard = ({ chain, audit }: AuditCardProps) => {
         >
           <Button
             variant="shadow"
-            color="success"
+            color={audit?.policyApproved ? "success" : "warning"}
             size="sm"
             fullWidth
-            onClick={() =>
-              toast.success("Insurance claim sent for verification.")
-            }
+            disabled={!audit?.policyApproved}
+            isLoading={isPending || isLoading}
+            onClick={handleClaimSubmit}
+            className="disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Claim Insurance
+            {audit?.policyApproved ? "Claim Insurance" : "Pending Approval"}
           </Button>
         </CardFooter>
       )}

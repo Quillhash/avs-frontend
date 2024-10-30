@@ -11,6 +11,8 @@ export type Audit = {
   approvals?: number
   policies?: Policies
   claim?: Claim
+  submissionId?: number
+  policyApproved?: boolean
 }
 
 export type Claim = {

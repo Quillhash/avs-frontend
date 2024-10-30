@@ -102,14 +102,14 @@ export default function AuditedContract() {
             <div className="flex flex-row gap-4 max-md:flex-col">
               <div className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-primary-foreground/5 px-5 py-4">
                 <h3 className="text-center text-xl font-semibold">
-                  Risk Score
+                  Security Score
                 </h3>
                 <div className="flex flex-row items-center justify-center gap-2">
                   <Image
                     src={"/icons/security-score.svg"}
                     width={32}
                     height={32}
-                    alt={"Risk Score"}
+                    alt={"Security Score"}
                   />
                   <h4 className="text-3xl font-bold">
                     {data?.auditReport?.securityScore}%
@@ -117,7 +117,7 @@ export default function AuditedContract() {
                 </div>
               </div>
 
-              <div className="rounded-xl bg-primary-foreground/5 px-5 py-4">
+              {/* <div className="rounded-xl bg-primary-foreground/5 px-5 py-4">
                 <div className="mb-2 text-xl font-semibold">Audit Summary:</div>
                 <div className="text-justify text-sm">
                   Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -127,7 +127,7 @@ export default function AuditedContract() {
                   excepturi, aliquam distinctio dolore inventore eius. Cumque,
                   ipsa!
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-col rounded-xl bg-primary-foreground/5 px-5 py-4">

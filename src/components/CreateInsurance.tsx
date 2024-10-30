@@ -1,4 +1,10 @@
 "use client"
+import { publicClient } from "@/app/contract/client"
+import {
+  QUILLTOKEN_ADDRESS,
+  SERVICE_MANAGER_CONTRACT_ADDRESS,
+} from "@/lib/constants"
+import { Audit } from "@/lib/types/common"
 import { calculatePremiumPayable } from "@/lib/utils/calculatePremiumPayable"
 import {
   Modal,
@@ -10,29 +16,35 @@ import {
   Input,
 } from "@nextui-org/react"
 import { useState } from "react"
-import { useAccount } from "wagmi"
+import { toast } from "sonner"
+import { parseAbi, parseEther } from "viem"
+import { useAccount, useBalance, useWriteContract } from "wagmi"
 
 type P = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  address: string
-  securityPercentage: number
+  audit: Audit
 }
 
-export const CreateInsurance = ({
-  isOpen,
-  onOpenChange,
-  address,
-  securityPercentage,
-}: P) => {
-  const { address: userAddress } = useAccount()
+export const CreateInsurance = ({ isOpen, onOpenChange, audit }: P) => {
+  const [loading, setLoading] = useState(false)
+  const { isPending, writeContractAsync } = useWriteContract()
+
+  const { address } = useAccount()
+  const { data: balance } = useBalance({
+    address,
+    token: QUILLTOKEN_ADDRESS,
+    query: { enabled: !!address },
+  })
+
+  const riskScore = audit?.report?.score
   const [coverageAmount, setCoverageAmount] = useState<number>()
   const [duration, setDuration] = useState<number>()
 
   const premiumPayable = calculatePremiumPayable(
     coverageAmount,
     duration,
-    securityPercentage
+    riskScore
   )
 
   const handleClose = () => {
@@ -41,17 +53,66 @@ export const CreateInsurance = ({
     onOpenChange(false)
   }
 
-  const onSubmit = () => {
-    if (!coverageAmount || !duration || !premiumPayable) return
+  const onSubmit = async () => {
+    if (!coverageAmount || !duration || !premiumPayable || !audit?.submissionId)
+      return toast.error("Please enter a valid values.")
 
-    handleClose()
+    if (!balance?.value) return toast.error("Insufficient QuillToken balance.")
 
-    console.log("premiumPayable", {
-      premiumPayable,
-      coverageAmount,
-      securityPercentage,
-      duration,
-    })
+    const hash = await writeContractAsync(
+      {
+        address: QUILLTOKEN_ADDRESS,
+        abi: parseAbi(["function approve(address spender, uint256 amount)"]),
+        functionName: "approve",
+        args: [
+          SERVICE_MANAGER_CONTRACT_ADDRESS,
+          parseEther(premiumPayable.toString()),
+        ],
+      },
+      {
+        onError: (error) => {
+          console.error(error)
+          toast.error("Failed to create insurance")
+        },
+      }
+    )
+
+    setLoading(true)
+    const data = await publicClient.waitForTransactionReceipt({ hash })
+    setLoading(false)
+
+    if (data?.status === "reverted") {
+      toast.error("Failed to create insurance")
+      return
+    }
+
+    await writeContractAsync(
+      {
+        address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+        abi: parseAbi([
+          "function createNewInsuranceTask(uint256 _submissionId,uint256 _coverageAmount,uint256 _duration)",
+        ]),
+        functionName: "createNewInsuranceTask",
+        args: [
+          BigInt(audit?.submissionId),
+          parseEther(coverageAmount.toString()),
+          BigInt(duration * 2_592_000),
+        ],
+      },
+      {
+        onError: (error) => {
+          console.error(error)
+          toast.error("Failed to create insurance")
+        },
+        onSuccess: () => {
+          toast.success("Insurance created successfully.", {
+            description:
+              "You will be able to view the report once it is approved.",
+          })
+          handleClose()
+        },
+      }
+    )
   }
 
   return (
@@ -61,6 +122,7 @@ export const CreateInsurance = ({
       backdrop="blur"
       onOpenChange={handleClose}
       placement="center"
+      isDismissable={false}
     >
       <ModalContent>
         <ModalHeader className="inline-flex flex-col gap-1">
@@ -100,6 +162,7 @@ export const CreateInsurance = ({
             className="bg-gradient-to-br from-secondary to-primary font-semibold disabled:cursor-not-allowed disabled:opacity-70"
             fullWidth
             disabled={!coverageAmount || !duration || !premiumPayable}
+            isLoading={isPending || loading}
           >
             Pay Premium and Start Insurance
           </Button>

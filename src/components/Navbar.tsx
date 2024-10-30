@@ -48,8 +48,8 @@ export const Navbar = () => {
   const { address } = useAccount()
   const { data, isLoading, refetch } = useBalance({
     address,
-    token: "0x7607C082538c187F9050e23680D52B7EFC190011",
-    query: { enabled: !!address },
+    token: QUILLTOKEN_ADDRESS,
+    query: { enabled: !!address, refetchInterval: 10 * 1000 },
   })
 
   const { data: hash, writeContract, isPending } = useWriteContract()

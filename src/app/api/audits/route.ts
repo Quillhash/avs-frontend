@@ -42,39 +42,51 @@ export async function GET(request: NextRequest) {
     // Fetch submissions for each paginated audit index
     const submissions = await Promise.all(
       paginatedAudits.map(async (index: any) => {
-        const [submission, approvals, report, policies, claim] =
-          await Promise.all([
-            publicClient.readContract({
-              abi,
-              address: SERVICE_MANAGER_CONTRACT_ADDRESS,
-              functionName: "getSubmission",
-              args: [index],
-            }),
-            publicClient.readContract({
-              abi,
-              address: SERVICE_MANAGER_CONTRACT_ADDRESS,
-              functionName: "getApprovalCount",
-              args: [index],
-            }),
-            publicClient.readContract({
-              abi,
-              address: SERVICE_MANAGER_CONTRACT_ADDRESS,
-              functionName: "auditReports",
-              args: [index],
-            }),
-            publicClient.readContract({
-              abi,
-              address: SERVICE_MANAGER_CONTRACT_ADDRESS,
-              functionName: "getPolicy",
-              args: [index],
-            }),
-            publicClient.readContract({
-              abi,
-              address: SERVICE_MANAGER_CONTRACT_ADDRESS,
-              functionName: "getClaim",
-              args: [index],
-            }),
-          ])
+        const [
+          submission,
+          approvals,
+          report,
+          policies,
+          claim,
+          insuranceTaskCheck,
+        ] = await Promise.all([
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+            functionName: "getSubmission",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+            functionName: "getApprovalCount",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+            functionName: "auditReports",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+            functionName: "getPolicy",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+            functionName: "getClaim",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER_CONTRACT_ADDRESS,
+            functionName: "insuranceTaskCheck",
+            args: [index],
+          }),
+        ])
         const formattedReport = {
           //@ts-expect-error
           ipfsHash: report[0],
@@ -99,6 +111,8 @@ export async function GET(request: NextRequest) {
           approvals: approvals || 0,
           policies,
           claim,
+          policyApproved: insuranceTaskCheck,
+          submissionId: index,
         }
       })
     )

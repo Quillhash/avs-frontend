@@ -6,7 +6,6 @@ import {
   CardFooter,
   CardHeader,
   Chip,
-  Spinner,
   useDisclosure,
 } from "@nextui-org/react"
 import Image from "next/image"
@@ -14,6 +13,7 @@ import Link from "next/link"
 import { CreateInsurance } from "./CreateInsurance"
 import { CHAINS } from "@/lib/constants"
 import { Audit } from "@/lib/types/common"
+import { IconHourglass } from "@tabler/icons-react"
 
 type AuditCardProps = {
   chain: (typeof CHAINS)[0]
@@ -25,12 +25,11 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
 
   return (
     <>
-      {audit?.submission?.contractAddress && (
+      {!!audit?.submission?.contractAddress && (
         <CreateInsurance
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          address={audit?.submission?.contractAddress}
-          securityPercentage={98.32}
+          audit={audit}
         />
       )}
 
@@ -58,8 +57,8 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
         <CardBody className="mt-4 flex flex-row flex-wrap items-center justify-center gap-2 rounded-xl bg-primary-foreground/5">
           {!audit?.submission?.audited && (
             <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
-              <Spinner size="lg" className="h-16 w-16" color="warning" />
-              <div className="text-xl font-semibold text-warning">
+              <IconHourglass size={48} className="text-warning" />
+              <div className="font-mono text-lg font-semibold text-warning">
                 Audit in Progress
               </div>
             </div>
@@ -78,13 +77,15 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
           {!!audit?.submission?.audited && (
             <>
               <div className="flex flex-col items-center justify-center gap-2 p-1">
-                <h3 className="text-center text-sm font-medium">Risk Score</h3>
+                <h3 className="text-center text-sm font-medium">
+                  Security Score
+                </h3>
                 <div className="flex flex-row flex-wrap items-center justify-center gap-2">
                   <Image
                     src={"/icons/security-score.svg"}
                     width={22}
                     height={22}
-                    alt={"Risk Score"}
+                    alt={"Security Score"}
                   />
                   <h4 className="text-lg font-bold text-[#EEE]">
                     {audit?.report?.ipfsInfo?.auditReport?.securityScore}%

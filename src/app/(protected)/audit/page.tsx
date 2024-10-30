@@ -11,12 +11,12 @@ import { Button, Chip, cn, Input, Spinner, Tooltip } from "@nextui-org/react"
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
-import { isAddress, parseAbi } from "viem"
+import { isAddress, parseAbi, parseEther } from "viem"
 import { useAccount, useBalance, useWriteContract } from "wagmi"
 
 export default function Audit() {
   const selectedChain = CHAINS[0]
-  const [contractAddress, setContractAddress] = useState<string>()
+  const [contractAddress, setContractAddress] = useState("")
   const [loading, setLoading] = useState(false)
 
   const { address } = useAccount()
@@ -40,7 +40,7 @@ export default function Audit() {
         address: QUILLTOKEN_ADDRESS,
         abi: parseAbi(["function approve(address spender, uint256 amount)"]),
         functionName: "approve",
-        args: [SERVICE_MANAGER_CONTRACT_ADDRESS, balance?.value],
+        args: [SERVICE_MANAGER_CONTRACT_ADDRESS, parseEther("1")],
       },
       {
         onError: (error) => {
@@ -72,11 +72,11 @@ export default function Audit() {
           toast.error("Failed to submit audit task")
         },
         onSuccess: () => {
+          setContractAddress("")
           toast.success("Audit report task submitted successfully.", {
             description:
               "You will be able to view the report once the audit is completed.",
           })
-          setContractAddress(undefined)
         },
       }
     )
