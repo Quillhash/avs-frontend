@@ -40,11 +40,17 @@ export async function GET(request: NextRequest) {
     // Fetch submissions for each paginated audit index
     const submissions = await Promise.all(
       paginatedAudits.map(async (index: any) => {
-        const [submission, report] = await Promise.all([
+        const [submission, approvals, report] = await Promise.all([
           publicClient.readContract({
             abi,
             address: SERVICE_MANAGER,
             functionName: "getSubmission",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER,
+            functionName: "getApprovalCount",
             args: [index],
           }),
           publicClient.readContract({
@@ -71,6 +77,7 @@ export async function GET(request: NextRequest) {
             )
           ),
           report: formattedReport,
+          approvals: approvals || 0
         };
       })
     );
