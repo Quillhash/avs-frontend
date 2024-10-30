@@ -55,9 +55,13 @@ export async function GET(request: NextRequest) {
           })
         ]);
         const formattedReport = {
-          ipfsUrl: `https://ipfs.io/ipfs/${report[0]}`,
+          //@ts-expect-error
+          ipfsHash: report[0],
+          //@ts-expect-error
           ipfsInfo: report[0] ? JSON.parse(Object.keys(await fetchIpfsData(report[0]))[0]) : null,
+          //@ts-expect-error
           score: report[1],
+          //@ts-expect-error
           timestamp: report[2],
         };
         return {

@@ -5,7 +5,9 @@ import {
   INSURANCE_CONTRACT_ADDRESS,
   QUILLTOKEN_ADDRESS,
 } from "@/lib/constants"
-import { Button, Chip, cn, Input, Tooltip } from "@nextui-org/react"
+import { AuditedContractsResponse } from "@/lib/types/common"
+import { Button, Chip, cn, Input, Spinner, Tooltip } from "@nextui-org/react"
+import { useQuery } from "@tanstack/react-query"
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -17,10 +19,22 @@ export default function Audit() {
   const [contractAddress, setContractAddress] = useState<string>()
 
   const { address } = useAccount()
-  const { data } = useBalance({
+  const { data: balance } = useBalance({
     address,
     token: QUILLTOKEN_ADDRESS,
     query: { enabled: !!address },
+  })
+
+  const { data, isLoading } = useQuery<AuditedContractsResponse>({
+    queryKey: ["audited-contracts", "recent", address],
+    queryFn: async () => {
+      // TODO: Replace with actual contract address
+      const address = "0x0f06bF73403682893aC9dA53b59340c65C95807A"
+      const response = await fetch(`/api/audits?address=${address}&limit=3`)
+      const data = await response.json()
+      return data
+    },
+    enabled: !!address,
   })
 
   const { isPending, writeContractAsync } = useWriteContract()
@@ -28,7 +42,7 @@ export default function Audit() {
   const handleAuditSubmit = async () => {
     if (!contractAddress || !isAddress(contractAddress))
       return toast.error("Please enter a valid contract address.")
-    if (!data?.value) return toast.error("Insufficient QuillToken balance.")
+    if (!balance?.value) return toast.error("Insufficient QuillToken balance.")
     console.log("contractAddress", contractAddress)
 
     await writeContractAsync(
@@ -36,7 +50,7 @@ export default function Audit() {
         address: QUILLTOKEN_ADDRESS,
         abi: parseAbi(["function approve(address spender, uint256 amount)"]),
         functionName: "approve",
-        args: [INSURANCE_CONTRACT_ADDRESS, data?.value],
+        args: [INSURANCE_CONTRACT_ADDRESS, balance?.value],
       },
       {
         onError: (error) => {
@@ -70,7 +84,7 @@ export default function Audit() {
   }
 
   return (
-    <div className="grid max-h-screen grid-rows-[1fr_1fr] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
+    <div className="grid max-h-screen items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">
       <main className="flex flex-col items-center justify-center gap-8">
         <div className="text-center font-mono text-2xl font-bold">
           Get Started by{" "}
@@ -133,7 +147,7 @@ export default function Audit() {
         </div>
       </main>
 
-      <div className="">
+      <div className="text-center">
         <div className="mb-8 flex flex-col items-center justify-center gap-8">
           <div className="text-center font-mono text-2xl font-bold">
             Recently{" "}
@@ -144,11 +158,23 @@ export default function Audit() {
           </div>
         </div>
 
-        <div className="grid max-w-4xl grid-cols-1 items-stretch justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <AuditCard key={index} index={index} chain={CHAINS[0]} />
-          ))}
-        </div>
+        {isLoading ? (
+          <Spinner size="lg" color="secondary" />
+        ) : data?.audits?.length ? (
+          <div className="grid max-w-4xl grid-cols-1 items-stretch justify-center gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {data?.audits.map((audit) => (
+              <AuditCard
+                key={audit?.submission?.timestamp}
+                chain={CHAINS[0]}
+                audit={audit}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center font-mono text-lg text-primary-foreground/50">
+            No Audits Yet
+          </div>
+        )}
       </div>
     </div>
   )
