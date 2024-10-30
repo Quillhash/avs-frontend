@@ -4,7 +4,7 @@ import { IRON_OPTIONS } from "@/lib/config/session";
 import { getIronSession } from "iron-session";
 import { publicClient } from "../../contract/client";
 import abi from "../../contract/abi.json";
-import { SERVICE_MANAGER } from "@/lib/constants";
+import { POLICY_STATUS, SERVICE_MANAGER } from "@/lib/constants";
 import { fetchIpfsData } from "@/lib/utils/getIpfsData";
 
 export async function GET(request: NextRequest) {
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     // Fetch submissions for each paginated audit index
     const submissions = await Promise.all(
       paginatedAudits.map(async (index: any) => {
-        const [submission, approvals, report] = await Promise.all([
+        const [submission, approvals, report, policies, claim] = await Promise.all([
           publicClient.readContract({
             abi,
             address: SERVICE_MANAGER,
@@ -58,7 +58,19 @@ export async function GET(request: NextRequest) {
             address: SERVICE_MANAGER,
             functionName: "auditReports",
             args: [index],
-          })
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER,
+            functionName: "getPolicy",
+            args: [index],
+          }),
+          publicClient.readContract({
+            abi,
+            address: SERVICE_MANAGER,
+            functionName: "getClaim",
+            args: [index],
+          }),
         ]);
         const formattedReport = {
           //@ts-expect-error
@@ -70,14 +82,17 @@ export async function GET(request: NextRequest) {
           //@ts-expect-error
           timestamp: report[2],
         };
+        //@ts-expect-error
+        if (policies.status) {
+          //@ts-expect-error
+          policies.status= POLICY_STATUS[policies.status]
+        }
         return {
-          submission: JSON.parse(
-            JSON.stringify(submission, (key, value) =>
-              typeof value === "bigint" ? Number(value) : value
-            )
-          ),
+          submission,
           report: formattedReport,
-          approvals: approvals || 0
+          approvals: approvals || 0,
+          policies,
+          claim
         };
       })
     );
