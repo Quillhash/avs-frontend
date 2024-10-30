@@ -5,6 +5,7 @@ import { getIronSession } from "iron-session";
 import { publicClient } from "../../contract/client";
 import abi from "../../contract/abi.json";
 import { SERVICE_MANAGER } from "@/lib/constants";
+import { fetchIpfsData } from "@/lib/utils/getIpfsData";
 
 export async function GET(request: NextRequest) {
   try {
@@ -55,6 +56,7 @@ export async function GET(request: NextRequest) {
         ]);
         const formattedReport = {
           ipfsUrl: `https://ipfs.io/ipfs/${report[0]}`,
+          ipfsInfo: report[0] ? JSON.parse(Object.keys(await fetchIpfsData(report[0]))[0]) : null,
           score: report[1],
           timestamp: report[2],
         };
