@@ -1,24 +1,11 @@
 "use client"
 import { AuditCard } from "@/components"
 import { CHAINS } from "@/lib/constants"
-import { AuditedContractsResponse } from "@/lib/types/common"
+import { useAuditedContracts } from "@/lib/hooks/useAuditedContracts"
 import { Spinner } from "@nextui-org/react"
-import { useQuery } from "@tanstack/react-query"
-import { useAccount } from "wagmi"
 
 export default function AuditedContracts() {
-  const { address } = useAccount()
-  const { data, isLoading } = useQuery<AuditedContractsResponse>({
-    queryKey: ["audited-contracts", "all", address],
-    queryFn: async () => {
-      // TODO: Replace with actual contract address
-      const address = "0x0f06bF73403682893aC9dA53b59340c65C95807A"
-      const response = await fetch(`/api/audits?address=${address}&limit=12`)
-      const data = await response.json()
-      return data
-    },
-    enabled: !!address,
-  })
+  const { data, isLoading } = useAuditedContracts()
 
   return (
     <div className="grid max-h-screen grid-rows-[32px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 sm:p-20">

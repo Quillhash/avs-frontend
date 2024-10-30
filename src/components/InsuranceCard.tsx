@@ -1,4 +1,6 @@
 "use client"
+import { CHAINS } from "@/lib/constants"
+import { Audit } from "@/lib/types/common"
 import {
   Button,
   Card,
@@ -8,23 +10,30 @@ import {
   Chip,
   Spinner,
 } from "@nextui-org/react"
-import { IconCircleCheckFilled, IconCircleXFilled } from "@tabler/icons-react"
+import { IconCircleCheckFilled } from "@tabler/icons-react"
 import Image from "next/image"
 import { toast } from "sonner"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const InsuranceCard = ({ index, chain }: any) => {
-  const address = "0x1234567890123456789012345678901234567890"
+type AuditCardProps = {
+  chain: (typeof CHAINS)[0]
+  audit?: Audit
+}
+
+export const InsuranceCard = ({ chain, audit }: AuditCardProps) => {
+  const durationInMS =
+    (audit?.policies?.endTime || 0) - (audit?.policies?.startTime || 0)
+  const durationInMonths = Math.abs(durationInMS) / 30 / 24 / 60 / 60 / 1000
 
   return (
     <Card
-      key={index}
       isFooterBlurred
       radius="lg"
       className="group border-none p-2 transition-all"
     >
       <CardHeader className="grid items-center gap-2 py-2">
-        <p className="truncate font-mono font-semibold">{address}</p>
+        <p className="truncate font-mono font-semibold">
+          {audit?.submission?.contractAddress}
+        </p>
         <Chip
           size="sm"
           color="secondary"
@@ -38,7 +47,7 @@ export const InsuranceCard = ({ index, chain }: any) => {
       </CardHeader>
 
       <CardBody className="mt-4 flex flex-row flex-wrap items-center justify-center gap-2 rounded-xl bg-primary-foreground/5">
-        {index === 0 && (
+        {audit?.policies?.status === 2 && (
           <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
             <Spinner size="lg" className="h-16 w-16" color="warning" />
             <div className="text-xl font-semibold text-warning">
@@ -49,7 +58,8 @@ export const InsuranceCard = ({ index, chain }: any) => {
             </div>
           </div>
         )}
-        {index === 1 && (
+
+        {/* {audit?.policies?.status === 0 && (
           <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
             <IconCircleXFilled size={64} className="text-danger" />
             <div className="text-xl font-semibold text-danger">
@@ -59,8 +69,9 @@ export const InsuranceCard = ({ index, chain }: any) => {
               You will be able to apply again after 3 months
             </div>
           </div>
-        )}
-        {index === 4 && (
+        )} */}
+
+        {audit?.policies?.status === 3 && (
           <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
             <IconCircleCheckFilled size={64} className="text-success" />
             <div className="text-xl font-semibold text-success">
@@ -71,12 +82,15 @@ export const InsuranceCard = ({ index, chain }: any) => {
             </div>
           </div>
         )}
-        {index !== 0 && index !== 1 && index !== 4 && (
+
+        {audit?.policies?.status === 1 && (
           <>
             <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
               <h3 className="text-center text-sm font-medium">Duration</h3>
               <div className="flex flex-row flex-wrap items-center justify-center gap-2">
-                <h4 className="text-lg font-bold text-[#EEE]">3 months</h4>
+                <h4 className="text-lg font-bold text-[#EEE]">
+                  {durationInMonths} months
+                </h4>
               </div>
             </div>
 
@@ -85,7 +99,9 @@ export const InsuranceCard = ({ index, chain }: any) => {
                 Coverage Amount
               </h3>
               <div className="flex flex-row flex-wrap items-center justify-center gap-2">
-                <h4 className="text-lg font-bold text-[#EEE]">3,000 QT</h4>
+                <h4 className="text-lg font-bold text-[#EEE]">
+                  {audit?.policies?.coverageAmount} QT
+                </h4>
               </div>
             </div>
 
@@ -98,14 +114,16 @@ export const InsuranceCard = ({ index, chain }: any) => {
                   height={22}
                   alt={"Risk Score"}
                 />
-                <h4 className="text-lg font-bold text-[#EEE]">98.32%</h4>
+                <h4 className="text-lg font-bold text-[#EEE]">
+                  {audit?.report?.ipfsInfo?.auditReport?.securityScore}%
+                </h4>
               </div>
             </div>
           </>
         )}
       </CardBody>
 
-      {index !== 0 && index !== 1 && index !== 4 && (
+      {audit?.policies?.status === 1 && (
         <CardFooter
           className="absolute bottom-2 z-10 hidden w-[calc(100%_-_16px)] gap-2 overflow-hidden rounded-large border-1 border-white/20 p-2 shadow-2xl transition-all group-hover:flex"
           style={{ animation: "fadeInUp 0.25s" }}

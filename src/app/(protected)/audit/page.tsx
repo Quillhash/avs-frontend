@@ -1,13 +1,13 @@
 "use client"
+import { publicClient } from "@/app/contract/client"
 import { AuditCard } from "@/components"
 import {
   CHAINS,
-  INSURANCE_CONTRACT_ADDRESS,
+  SERVICE_MANAGER_CONTRACT_ADDRESS,
   QUILLTOKEN_ADDRESS,
 } from "@/lib/constants"
-import { AuditedContractsResponse } from "@/lib/types/common"
+import { useAuditedContracts } from "@/lib/hooks/useAuditedContracts"
 import { Button, Chip, cn, Input, Spinner, Tooltip } from "@nextui-org/react"
-import { useQuery } from "@tanstack/react-query"
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -17,6 +17,7 @@ import { useAccount, useBalance, useWriteContract } from "wagmi"
 export default function Audit() {
   const selectedChain = CHAINS[0]
   const [contractAddress, setContractAddress] = useState<string>()
+  const [loading, setLoading] = useState(false)
 
   const { address } = useAccount()
   const { data: balance } = useBalance({
@@ -25,17 +26,7 @@ export default function Audit() {
     query: { enabled: !!address },
   })
 
-  const { data, isLoading } = useQuery<AuditedContractsResponse>({
-    queryKey: ["audited-contracts", "recent", address],
-    queryFn: async () => {
-      // TODO: Replace with actual contract address
-      const address = "0x0f06bF73403682893aC9dA53b59340c65C95807A"
-      const response = await fetch(`/api/audits?address=${address}&limit=3`)
-      const data = await response.json()
-      return data
-    },
-    enabled: !!address,
-  })
+  const { data, isLoading } = useAuditedContracts(true)
 
   const { isPending, writeContractAsync } = useWriteContract()
 
@@ -43,26 +34,34 @@ export default function Audit() {
     if (!contractAddress || !isAddress(contractAddress))
       return toast.error("Please enter a valid contract address.")
     if (!balance?.value) return toast.error("Insufficient QuillToken balance.")
-    console.log("contractAddress", contractAddress)
 
-    await writeContractAsync(
+    const hash = await writeContractAsync(
       {
         address: QUILLTOKEN_ADDRESS,
         abi: parseAbi(["function approve(address spender, uint256 amount)"]),
         functionName: "approve",
-        args: [INSURANCE_CONTRACT_ADDRESS, balance?.value],
+        args: [SERVICE_MANAGER_CONTRACT_ADDRESS, balance?.value],
       },
       {
         onError: (error) => {
           console.error(error)
-          toast.error("Failed to approve QuillToken")
+          toast.error("Failed to submit audit task")
         },
       }
     )
 
+    setLoading(true)
+    const data = await publicClient.waitForTransactionReceipt({ hash })
+    setLoading(false)
+
+    if (data?.status === "reverted") {
+      toast.error("Failed to submit audit task")
+      return
+    }
+
     await writeContractAsync(
       {
-        address: INSURANCE_CONTRACT_ADDRESS,
+        address: SERVICE_MANAGER_CONTRACT_ADDRESS,
         abi: parseAbi(["function createNewAuditTask(address contractAddress)"]),
         functionName: "createNewAuditTask",
         args: [contractAddress as `0x${string}`],
@@ -109,7 +108,7 @@ export default function Audit() {
               variant="shadow"
               disabled={!contractAddress}
               onClick={handleAuditSubmit}
-              isLoading={isPending}
+              isLoading={isPending || loading}
             >
               Audit
             </Button>

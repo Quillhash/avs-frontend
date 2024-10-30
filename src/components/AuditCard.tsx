@@ -55,7 +55,7 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
           </Chip>
         </CardHeader>
 
-        <CardBody className="mt-4 flex flex-row items-center justify-center gap-2 rounded-xl bg-primary-foreground/5">
+        <CardBody className="mt-4 flex flex-row flex-wrap items-center justify-center gap-2 rounded-xl bg-primary-foreground/5">
           {!audit?.submission?.audited && (
             <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
               <Spinner size="lg" className="h-16 w-16" color="warning" />
@@ -101,13 +101,28 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
                     src={"/icons/remaining.svg"}
                     width={22}
                     height={22}
-                    alt={"Risk Score"}
+                    alt={"issues"}
                   />
                   <h4 className="text-lg font-bold text-[#EEE]">
                     {
                       audit?.report?.ipfsInfo?.auditReport?.vulnerabilities
                         ?.length
                     }
+                  </h4>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center gap-2 p-1">
+                <h3 className="text-center text-sm font-medium">Approvals</h3>
+                <div className="flex flex-row flex-wrap items-center justify-center gap-2">
+                  <Image
+                    src={"/icons/resolved.svg"}
+                    width={22}
+                    height={22}
+                    alt={"Approvals"}
+                  />
+                  <h4 className="text-lg font-bold text-[#EEE]">
+                    {audit?.approvals}
                   </h4>
                 </div>
               </div>
@@ -131,7 +146,7 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
               View Report
             </Button>
 
-            {/* {index % 2 === 0 && (
+            {!audit?.policies?.policyId && (
               <Button
                 variant="shadow"
                 color="warning"
@@ -141,7 +156,7 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
               >
                 Create Insurance
               </Button>
-            )} */}
+            )}
           </CardFooter>
         )}
       </Card>

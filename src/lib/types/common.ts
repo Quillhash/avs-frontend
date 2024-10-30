@@ -8,6 +8,31 @@ export type AuditedContractsResponse = {
 export type Audit = {
   submission?: Submission
   report?: Report
+  approvals?: number
+  policies?: Policies
+  claim?: Claim
+}
+
+export type Claim = {
+  claimId?: number
+  policyId?: number
+  evidenceIPFSHash?: string
+  timestamp?: number
+  processed?: boolean
+  approved?: boolean
+}
+
+export type Policies = {
+  policyId?: number
+  owner?: string
+  submissionId?: number
+  riskScore?: number
+  coverageAmount?: number
+  premiumAmount?: number
+  startTime?: number
+  endTime?: number
+  status?: number
+  statusText?: string
 }
 
 export type Report = {

@@ -3,15 +3,16 @@ export const COOKIE_KEYS = {
 }
 
 export const QUILLTOKEN_ADDRESS = "0x7607C082538c187F9050e23680D52B7EFC190011"
-export const SERVICE_MANAGER = "0x746cad9a83f22fbc14a5c0cef4092c416401093b"
-export const INSURANCE_CONTRACT_ADDRESS =
-  "0x5b18cEc9860cd895B1D01b9a29154C4CF4DB34F2"
+export const SERVICE_MANAGER_CONTRACT_ADDRESS =
+  "0x719db00c33cf69e241398d9cb4762e3c9005ae7e"
+
 export const POLICY_STATUS = {
   0: "Inactive",
   1: "Active",
   2: "ClaimFiled",
-  3: "ClaimApproved"
+  3: "ClaimApproved",
 }
+
 export const CHAINS = [
   {
     name: "Holesky Testnet",

@@ -1,6 +1,9 @@
 /* eslint-disable */
 // @ts-nocheck
-import { QUILLTOKEN_ADDRESS, INSURANCE_CONTRACT_ADDRESS } from "@/lib/constants"
+import {
+  QUILLTOKEN_ADDRESS,
+  SERVICE_MANAGER_CONTRACT_ADDRESS,
+} from "@/lib/constants"
 import {
   useAccount,
   useBalance,
@@ -27,17 +30,17 @@ async function submit() {
  * @param {string} contractAddress - The address of the contract to be audited.
  */
 async function submitContract(contractAddress) {
-  // Approve the INSURANCE_CONTRACT_ADDRESS to spend a large amount of QUILL tokens on behalf of the user
+  // Approve the SERVICE_MANAGER_CONTRACT_ADDRESS to spend a large amount of QUILL tokens on behalf of the user
   writeContract({
     address: QUILLTOKEN_ADDRESS, // Address of the QUILLTOKEN contract
     abi: parseAbi(["function approve(address spender, uint256 amount)"]), // ABI for the approve function
     functionName: "approve", // Function to call
-    args: [INSURANCE_CONTRACT_ADDRESS, parseEther("10000000000")], // Arguments: spender address and approval amount
+    args: [SERVICE_MANAGER_CONTRACT_ADDRESS, parseEther("10000000000")], // Arguments: spender address and approval amount
   })
 
-  // Call the createNewAuditTask function on the INSURANCE_CONTRACT_ADDRESS
+  // Call the createNewAuditTask function on the SERVICE_MANAGER_CONTRACT_ADDRESS
   writeContract({
-    address: INSURANCE_CONTRACT_ADDRESS, // Address of the Insurance contract
+    address: SERVICE_MANAGER_CONTRACT_ADDRESS, // Address of the Insurance contract
     abi: parseAbi(["function createNewAuditTask(address contractAddress)"]), // ABI for createNewAuditTask
     functionName: "createNewAuditTask", // Function to call
     args: [contractAddress], // Arguments: contract address to audit
@@ -51,17 +54,17 @@ async function submitContract(contractAddress) {
  * @param {number} duration - The duration of the insurance coverage.
  */
 async function submitInsuranceTx(submissionId, coverageAmount, duration) {
-  // Approve the INSURANCE_CONTRACT_ADDRESS to spend a large amount of QUILL tokens on behalf of the user
+  // Approve the SERVICE_MANAGER_CONTRACT_ADDRESS to spend a large amount of QUILL tokens on behalf of the user
   writeContract({
     address: QUILLTOKEN_ADDRESS, // Address of the QUILLTOKEN contract
     abi: parseAbi(["function approve(address spender, uint256 amount)"]), // ABI for the approve function
     functionName: "approve", // Function to call
-    args: [INSURANCE_CONTRACT_ADDRESS, parseEther("10000000000")], // Arguments: spender address and approval amount
+    args: [SERVICE_MANAGER_CONTRACT_ADDRESS, parseEther("10000000000")], // Arguments: spender address and approval amount
   })
 
-  // Call the createNewInsuranceTask function on the INSURANCE_CONTRACT_ADDRESS with the specified parameters
+  // Call the createNewInsuranceTask function on the SERVICE_MANAGER_CONTRACT_ADDRESS with the specified parameters
   writeContract({
-    address: INSURANCE_CONTRACT_ADDRESS, // Address of the Insurance contract
+    address: SERVICE_MANAGER_CONTRACT_ADDRESS, // Address of the Insurance contract
     abi: parseAbi([
       "function createNewInsuranceTask(uint256 _submissionId,uint256 _coverageAmount,uint256 _duration)",
     ]), // ABI for createNewInsuranceTask
@@ -76,9 +79,9 @@ async function submitInsuranceTx(submissionId, coverageAmount, duration) {
  * @param {string} evidenceHash - The IPFS hash of the evidence supporting the claim.
  */
 async function submitFileCloan(policyId, evidenceHash) {
-  // Call the fileClaim function on the INSURANCE_CONTRACT_ADDRESS with the policy ID and evidence hash
+  // Call the fileClaim function on the SERVICE_MANAGER_CONTRACT_ADDRESS with the policy ID and evidence hash
   writeContract({
-    address: INSURANCE_CONTRACT_ADDRESS, // Address of the Insurance contract
+    address: SERVICE_MANAGER_CONTRACT_ADDRESS, // Address of the Insurance contract
     abi: parseAbi([
       "function fileClaim(uint256 _policyId,string memory _evidenceIPFSHash)",
     ]), // ABI for fileClaim
