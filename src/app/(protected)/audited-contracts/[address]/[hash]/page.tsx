@@ -27,9 +27,7 @@ export default function AuditedContract() {
     queryFn: async () => {
       if (!hash) return null
 
-      const data = JSON.parse(
-        Object.keys(await fetchIpfsData(hash as string))[0]
-      )
+      const data = await fetchIpfsData(hash as string)
       return data
     },
     enabled: !!hash,

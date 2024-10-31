@@ -87,14 +87,11 @@ export async function GET(request: NextRequest) {
             args: [index],
           }),
         ])
+        //@ts-expect-error
+        const ipfsHash = report[0]
         const formattedReport = {
-          //@ts-expect-error
-          ipfsHash: report[0],
-          //@ts-expect-error
-          ipfsInfo: report[0]
-            ? //@ts-expect-error
-              parseIpfsData(await fetchIpfsData(report[0]))
-            : null,
+          ipfsHash,
+          ipfsInfo: ipfsHash ? await fetchIpfsData(ipfsHash) : null,
           //@ts-expect-error
           score: report[1],
           //@ts-expect-error
@@ -128,13 +125,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ totalAudits, audits: serializedSubmissions })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 400 })
-  }
-}
-
-const parseIpfsData = (data: Record<string, string>) => {
-  try {
-    return JSON.parse(Object.keys(data)[0])
-  } catch {
-    return null
   }
 }
