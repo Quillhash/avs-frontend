@@ -67,8 +67,8 @@ export const AuditCard = ({ chain, audit }: AuditCardProps) => {
           {!!audit?.submission?.audited &&
             !audit?.report?.ipfsInfo?.auditReport && (
               <div className="flex flex-col items-center justify-center gap-2 p-1 text-center">
-                <IconCircleXFilled size={64} className="text-danger" />
-                <div className="text-xl font-semibold text-danger">
+                <IconCircleXFilled size={48} className="text-danger" />
+                <div className="font-mono text-lg font-semibold text-danger">
                   Audit Failed
                 </div>
               </div>

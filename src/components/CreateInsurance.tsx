@@ -4,6 +4,7 @@ import {
   QUILLTOKEN_ADDRESS,
   SERVICE_MANAGER_CONTRACT_ADDRESS,
 } from "@/lib/constants"
+import { useQTAllowance } from "@/lib/hooks/useQTAllowance"
 import { Audit } from "@/lib/types/common"
 import { calculatePremiumPayable } from "@/lib/utils/calculatePremiumPayable"
 import {
@@ -17,7 +18,7 @@ import {
 } from "@nextui-org/react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { parseAbi, parseEther } from "viem"
+import { maxUint256, parseAbi, parseEther } from "viem"
 import { useAccount, useBalance, useWriteContract } from "wagmi"
 
 type P = {
@@ -29,6 +30,8 @@ type P = {
 export const CreateInsurance = ({ isOpen, onOpenChange, audit }: P) => {
   const [loading, setLoading] = useState(false)
   const { isPending, writeContractAsync } = useWriteContract()
+  const { refetch: refetchAllowance, isFetching: allowanceLoading } =
+    useQTAllowance()
 
   const { address } = useAccount()
   const { data: balance } = useBalance({
@@ -57,33 +60,38 @@ export const CreateInsurance = ({ isOpen, onOpenChange, audit }: P) => {
     if (!coverageAmount || !duration || !premiumPayable || !audit?.submissionId)
       return toast.error("Please enter a valid values.")
 
-    if (!balance?.value) return toast.error("Insufficient QuillToken balance.")
+    if (!balance?.value)
+      return toast.error("Insufficient QuillToken balance.", {
+        description:
+          "You can mint QuillTokens by clicking the QuillTokens button on the Navbar.",
+      })
 
-    const hash = await writeContractAsync(
-      {
-        address: QUILLTOKEN_ADDRESS,
-        abi: parseAbi(["function approve(address spender, uint256 amount)"]),
-        functionName: "approve",
-        args: [
-          SERVICE_MANAGER_CONTRACT_ADDRESS,
-          parseEther(premiumPayable.toString()),
-        ],
-      },
-      {
-        onError: (error) => {
-          console.error(error)
-          toast.error("Failed to create insurance")
+    const allowance = (await refetchAllowance())?.data
+
+    if (!allowance || allowance <= premiumPayable) {
+      const hash = await writeContractAsync(
+        {
+          address: QUILLTOKEN_ADDRESS,
+          abi: parseAbi(["function approve(address spender, uint256 amount)"]),
+          functionName: "approve",
+          args: [SERVICE_MANAGER_CONTRACT_ADDRESS, maxUint256],
         },
+        {
+          onError: (error) => {
+            console.error(error)
+            toast.error("Failed to create insurance")
+          },
+        }
+      )
+
+      setLoading(true)
+      const data = await publicClient.waitForTransactionReceipt({ hash })
+      setLoading(false)
+
+      if (data?.status === "reverted") {
+        toast.error("Failed to create insurance")
+        return
       }
-    )
-
-    setLoading(true)
-    const data = await publicClient.waitForTransactionReceipt({ hash })
-    setLoading(false)
-
-    if (data?.status === "reverted") {
-      toast.error("Failed to create insurance")
-      return
     }
 
     await writeContractAsync(
@@ -162,7 +170,7 @@ export const CreateInsurance = ({ isOpen, onOpenChange, audit }: P) => {
             className="bg-gradient-to-br from-secondary to-primary font-semibold disabled:cursor-not-allowed disabled:opacity-70"
             fullWidth
             disabled={!coverageAmount || !duration || !premiumPayable}
-            isLoading={isPending || loading}
+            isLoading={isPending || loading || allowanceLoading}
           >
             Pay Premium and Start Insurance
           </Button>

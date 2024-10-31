@@ -7,11 +7,12 @@ import {
   QUILLTOKEN_ADDRESS,
 } from "@/lib/constants"
 import { useAuditedContracts } from "@/lib/hooks/useAuditedContracts"
+import { useQTAllowance } from "@/lib/hooks/useQTAllowance"
 import { Button, Chip, cn, Input, Spinner, Tooltip } from "@nextui-org/react"
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
-import { isAddress, parseAbi, parseEther } from "viem"
+import { isAddress, maxUint256, parseAbi } from "viem"
 import { useAccount, useBalance, useWriteContract } from "wagmi"
 
 export default function Audit() {
@@ -28,6 +29,8 @@ export default function Audit() {
 
   const { data, isLoading } = useAuditedContracts(true)
 
+  const { refetch: refetchAllowance, isFetching: allowanceLoading } =
+    useQTAllowance()
   const { isPending, writeContractAsync } = useWriteContract()
 
   const handleAuditSubmit = async () => {
@@ -36,31 +39,35 @@ export default function Audit() {
     if (!balance?.value)
       return toast.error("Insufficient QuillToken balance.", {
         description:
-          "You can mint QuillTokens by clicking the Mint QuillTokens button on the Navbar.",
+          "You can mint QuillTokens by clicking the QuillTokens button on the Navbar.",
       })
 
-    const hash = await writeContractAsync(
-      {
-        address: QUILLTOKEN_ADDRESS,
-        abi: parseAbi(["function approve(address spender, uint256 amount)"]),
-        functionName: "approve",
-        args: [SERVICE_MANAGER_CONTRACT_ADDRESS, parseEther("1")],
-      },
-      {
-        onError: (error) => {
-          console.error(error)
-          toast.error("Failed to submit audit task")
+    const allowance = (await refetchAllowance())?.data
+
+    if (!allowance || allowance <= 1) {
+      const hash = await writeContractAsync(
+        {
+          address: QUILLTOKEN_ADDRESS,
+          abi: parseAbi(["function approve(address spender, uint256 amount)"]),
+          functionName: "approve",
+          args: [SERVICE_MANAGER_CONTRACT_ADDRESS, maxUint256],
         },
+        {
+          onError: (error) => {
+            console.error(error)
+            toast.error("Failed to submit audit task")
+          },
+        }
+      )
+
+      setLoading(true)
+      const data = await publicClient.waitForTransactionReceipt({ hash })
+      setLoading(false)
+
+      if (data?.status === "reverted") {
+        toast.error("Failed to submit audit task")
+        return
       }
-    )
-
-    setLoading(true)
-    const data = await publicClient.waitForTransactionReceipt({ hash })
-    setLoading(false)
-
-    if (data?.status === "reverted") {
-      toast.error("Failed to submit audit task")
-      return
     }
 
     await writeContractAsync(
@@ -116,7 +123,7 @@ export default function Audit() {
               variant="shadow"
               disabled={!contractAddress}
               onClick={handleAuditSubmit}
-              isLoading={isPending || loading}
+              isLoading={isPending || loading || allowanceLoading}
             >
               Audit
             </Button>

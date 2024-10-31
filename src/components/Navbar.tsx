@@ -61,7 +61,7 @@ export const Navbar = () => {
       address: QUILLTOKEN_ADDRESS,
       abi: parseAbi(["function mint(address account, uint256 amount)"]),
       functionName: "mint",
-      args: [address, parseEther("10")],
+      args: [address, parseEther("100")],
     })
   }
 
